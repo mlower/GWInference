@@ -1,0 +1,10 @@
+/home/marcus.lower/src/pycbc/lib/python2.7/site-packages/emcee/ptsampler.py:335: RuntimeWarning: invalid value encountered in subtract
+  - lnprob[:, jupdate::2]
+/home/marcus.lower/src/pycbc/lib/python2.7/site-packages/emcee/ptsampler.py:340: RuntimeWarning: invalid value encountered in less
+  accepts = logrs < logpaccept
+/home/marcus.lower/src/pycbc/lib/python2.7/site-packages/emcee/ptsampler.py:384: RuntimeWarning: invalid value encountered in subtract
+  paccept = dbeta * (logl[i, iperm] - logl[i - 1, i1perm])
+/home/marcus.lower/src/pycbc/lib/python2.7/site-packages/emcee/ptsampler.py:389: RuntimeWarning: invalid value encountered in greater
+  asel = (paccept > raccept)
+/home/marcus.lower/src/pycbc/lib/python2.7/site-packages/emcee/ptsampler.py:479: RuntimeWarning: invalid value encountered in double_scalars
+  return lnZ, np.abs(lnZ - lnZ2)
