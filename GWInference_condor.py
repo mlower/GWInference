@@ -224,3 +224,11 @@ def get_Evidence(sampler, pos, lnprob, rstate):
     print "lnZ_pt = {} +/- {}".format(lnZ_pt, dlnZ_pt)
     
     return lnZ_pt, dlnZ_pt
+
+def make_triangles(sampler, job):
+    ## Making corner plots:
+    truths=[35.,30.,np.log10(0.1),300.,(10.*np.pi/180),(20.9375*np.pi/180.),(45.*np.pi/180.),0.]
+    samples = sampler.chain[0]
+    samples = samples[:, 100:, :].reshape(-1, ndim)
+    fig = corner.corner(samples,labels=['m1', 'm2', 'log$_{10}$e', 'dist', 'iota', 'RA', 'DEC', '$\phi_{ref}$'],show_titles=True,quantiles=[0.16, 0.5, 0.84], truths=truths)
+    fig.savefig("posteriors/triangle_"+str(job.filename)+".png")

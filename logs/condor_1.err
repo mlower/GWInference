@@ -1,3 +1,4 @@
+mkdir: cannot create directory ‘injection_1’: File exists
 /home/marcus.lower/src/pycbc/lib/python2.7/site-packages/emcee/ptsampler.py:335: RuntimeWarning: invalid value encountered in subtract
   - lnprob[:, jupdate::2]
 /home/marcus.lower/src/pycbc/lib/python2.7/site-packages/emcee/ptsampler.py:340: RuntimeWarning: invalid value encountered in less

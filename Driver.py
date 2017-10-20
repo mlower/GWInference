@@ -2,7 +2,7 @@
 
 import numpy as np
 import os, sys, time
-import mod_GWInf as gwi
+import GWInference_condor as gwi
 from scipy.interpolate import interp1d
 import argparse
 
@@ -15,7 +15,7 @@ job = parser.parse_args()
 
 ## Setting up sampling parameters:
 ntemps = 16
-nwalkers = 16
+nwalkers = 20
 ndim = 8
 nsteps = 20
 
@@ -72,3 +72,9 @@ BF = np.exp(lnBF)
 print "lnBF = {} ".format(BF)
 
 np.savetxt('samples/BayesFactor/logEvidence_and_logBF_'+str(job.filename)+'.txt',np.c_[lnZe_pt, dlnZe_pt, dlnZ0_pt, dlnZ0_pt, BF])
+
+## make corner plots:
+print "making corner plots..."
+gwi.make_triangles(sampler_e, job)
+
+print "finished job "+str(job.filename)+"!"

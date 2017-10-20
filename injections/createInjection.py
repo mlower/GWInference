@@ -4,9 +4,9 @@ import sys, os, argparse
 import lalsimulation as lalsim
 import lal
 
-sys.path.append('../../../../..')
-import MonashGWTools.waveforms as wv
-import MonashGWTools.tools as tools
+#sys.path.append('../../../../..')
+import waveforms as wv
+import tools as tools
 
 def make_waveform(eccen, job):
     '''
@@ -68,3 +68,4 @@ data_t = detector_strain(data_p, data_c, RA, DEC, psi, epoch, deltaF)
 output = 'injection_'+str(inj.filename)+'/injectionFFT_'+str(inj.filename)+'.npy'
 np.save(output,np.c_[data[:,0],data_t])
 
+print("Injection made")

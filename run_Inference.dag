@@ -1,0 +1,7 @@
+JOB 0 /home/marcus.lower/public_html/projects/emceeSURF/GWInference/condor.sub
+VARS 0 jobNumber="0" 
+
+JOB 1 /home/marcus.lower/public_html/projects/emceeSURF/GWInference/condor.sub
+VARS 1 jobNumber="1" 
+
+PARENT 0 CHILD 1 

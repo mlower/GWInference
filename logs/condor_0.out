@@ -1,8 +1,10 @@
+Injection made
 sampling underway...
 finished sampling with e > 0top
 sampling underway...
 finished sampling with e = 0
-time taken =  85.2962579727
-lnZ_pt = -934.316352114 +/- 58.9288458689
+time taken =  121.690176964
+lnZ_pt = -344.993304615 +/- 29.3225264701
 lnZ_pt = -inf +/- nan
 lnBF = inf 
+making corner plots...
