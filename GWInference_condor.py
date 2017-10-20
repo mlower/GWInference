@@ -14,6 +14,7 @@ import time
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import corner
 
 sys.path.append('../../../..')
 import MonashGWTools.waveforms as wv
@@ -25,19 +26,20 @@ import MonashGWTools.tools as tools
 ## Minimum + maximum thresholds:
 m1_min, m1_max = 25, 45
 m2_min, m2_max = 20, 40
-ecc_min, ecc_max = np.log10(1.e-10),np.log10(0.5)
+ecc_min, ecc_max = np.log10(1.e-11),np.log10(0.5)
 angle_min, angle_max = 0., np.pi*2.
 dist_min, dist_max = 50, 3000.
 
 #-----------------------------------------#
 
-def gen_waveform(phiRef, deltaF, m1, m2, fmin, fmax, iota, dist, e_min):
+def gen_waveform(deltaF, m1, m2, fmin, fmax, iota, dist, e_min):
 
     fref = 20.
     m1 *= lal.lal.MSUN_SI
     m2 *= lal.lal.MSUN_SI
     dist = 1e6*lal.lal.PC_SI*dist
     phaseO = 1
+    phiRef = 0.
     
     meanPerAno = 0.0
     longAscNodes = 0.0
@@ -111,16 +113,23 @@ def logPrior(x):
     iota = x[4]
     RA = x[5]
     DEC = x[6]
-    phiRef = x[7]
 
-    if m1 >= m1_min and m1 <= m1_max and m2 <= m2_max and m2 >= m2_min and e_min <= ecc_max and e_min >= ecc_min and dist <= dist_max and dist >= dist_min and iota <= angle_max and iota >= angle_min and RA <= angle_max and RA >= angle_min and DEC <= angle_max and DEC >= angle_min and phiRef <= angle_max and phiRef >= angle_min and m1 > m2 :
+    if m1 >= m1_min and m1 <= m1_max and m2 <= m2_max and m2 >= m2_min and e_min <= ecc_max and e_min >= ecc_min and dist <= dist_max and dist >= dist_min and iota <= angle_max and iota >= angle_min and RA <= angle_max and RA >= angle_min and DEC <= angle_max and DEC >= angle_min and m1 > m2 :
         
         eta = (m1*m2)/((m1+m2)**2.)
         
         ##-- Prior --###
         logprior = np.log(((m1+m2)*(m1+m2))/((m1-m2)*pow(eta,3.0/5.0)) )
-
         return logprior
+    
+    elif m1 >= m1_min and m1 <= m1_max and m2 <= m2_max and m2 >= m2_min and e_min == 0.0 and dist <= dist_max and dist >= dist_min and iota <= angle_max and iota >= angle_min and RA <= angle_max and RA >= angle_min and DEC <= angle_max and DEC >= angle_min and m1 > m2 :
+        
+        eta = (m1*m2)/((m1+m2)**2.)
+        
+        ##-- Prior --###
+        logprior = np.log(((m1+m2)*(m1+m2))/((m1-m2)*pow(eta,3.0/5.0)) )
+        return logprior
+    
     else:
         return -np.inf
 
@@ -135,13 +144,12 @@ def logL(x, data, PSD, fmin, fmax, deltaF):
     iota = x[4]
     RA = x[5]
     DEC = x[6]
-    phiRef = x[7]
 
-    if m1 >= m1_min and m1 <= m1_max and m2 <= m2_max and m2 >= m2_min and e_min <= ecc_max and e_min >= ecc_min and dist <= dist_max and dist >= dist_min and iota <= angle_max and iota >= angle_min and RA <= angle_max and RA >= angle_min and DEC <= angle_max and DEC >= angle_min and phiRef <= angle_max and phiRef >= angle_min and m1 > m2 :
+    if m1 >= m1_min and m1 <= m1_max and m2 <= m2_max and m2 >= m2_min and e_min <= ecc_max and e_min >= ecc_min and dist <= dist_max and dist >= dist_min and iota <= angle_max and iota >= angle_min and RA <= angle_max and RA >= angle_min and DEC <= angle_max and DEC >= angle_min and m1 > m2 :
                   
         # generate the waveform:
         e_min = 10**(e_min)
-        hp, hc = gen_waveform(phiRef, deltaF, m1, m2, fmin, fmax, iota, dist, e_min)
+        hp, hc = gen_waveform(deltaF, m1, m2, fmin, fmax, iota, dist, e_min)
                
         # Start time of data + strain in detector frame:
         epoch = 1000000008
@@ -158,36 +166,56 @@ def logL(x, data, PSD, fmin, fmax, deltaF):
         
         # log(Likelihood):
         logL = logsumexp( scores ).real - 0.5*( hh + dd ) + np.log(1./(2.*fmax))
-        
-        
-        
         return logL
+ 
+    elif m1 >= m1_min and m1 <= m1_max and m2 <= m2_max and m2 >= m2_min and e_min == 0.0 and dist <= dist_max and dist >= dist_min and iota <= angle_max and iota >= angle_min and RA <= angle_max and RA >= angle_min and DEC <= angle_max and DEC >= angle_min and m1 > m2 :    
         
+        hp, hc = gen_waveform(deltaF, m1, m2, fmin, fmax, iota, dist, e_min)
+               
+        # Start time of data + strain in detector frame:
+        epoch = 1000000008
+        htilde = detector_strain(hp, hc, RA, DEC, 0., epoch, deltaF)
+
+        # make len(htilde) = len(data) by appending zeroes
+        htilde, data = make_arr_samesize(htilde, data)
+        
+        ##-- Likelihood --###
+        dh =  deltaF*4*data.conjugate()*htilde / PSD
+        hh = deltaF*4.*np.sum( htilde.conjugate()*htilde/PSD ).real
+        dd = deltaF*4.*np.sum( data.conjugate()*data/PSD ).real
+        scores = len(data)*( -0.5* ( -2*np.fft.irfft(dh)) )
+        
+        # log(Likelihood):
+        logL = logsumexp( scores ).real - 0.5*( hh + dd ) + np.log(1./(2.*fmax))
+        return logL    
+    
     else:
+        print('logL params out of range')
         return -np.inf
 
-def get_p0(ntemps, ndim, nsteps, nwalkers, ecc=True):
+def run_sampler(data, PSD, fmin, fmax, deltaF, ntemps, ndim, nsteps, nwalkers, ecc=True):
     '''
     Setting parameters: 
     '''
+    m1_min, m1_max = 25, 45
+    m2_min, m2_max = 20, 40
+
+    angle_min, angle_max = 0., np.pi*2.
+    dist_min, dist_max = 50, 3000.
+    
     m1 = np.random.uniform(low=(m1_min+5), high=m1_max, size=(ntemps, nwalkers, 1))
     m2 =  np.random.uniform(low=m2_min, high=m2_max, size=(ntemps, nwalkers, 1))
     
-    e_min = np.random.uniform(low=ecc_min, high=ecc_max, size=(ntemps, nwalkers, 1))
-    if ecc == False:
-        for i in range(0,ntemps):
-            for k in range(0,nwalkers):
-                e_min[i,k,0] = 5.e-10
+    if ecc == True:
+        ecc_min, ecc_max = np.log10(1.e-11),np.log10(0.5)
+        e_min = np.random.uniform(low=ecc_min, high=ecc_max, size=(ntemps, nwalkers, 1))
     else:
-        pass
+        e_min = np.zeros((ntemps, nwalkers, 1))
     
     dist = np.random.uniform(low=dist_min, high=dist_max, size=(ntemps, nwalkers, 1))
     iota = np.random.uniform(low=angle_min, high=0.5*angle_max, size=(ntemps, nwalkers, 1))
-    
     RA = np.random.uniform(low=angle_min, high=angle_max, size=(ntemps, nwalkers, 1))
-    DEC = np.random.uniform(low=angle_min, high=angle_max, size=(ntemps, nwalkers, 1))
-    psi = np.random.uniform(low=angle_min, high=angle_max, size=(ntemps, nwalkers, 1))
-    phiRef = np.random.uniform(low=angle_min, high=angle_max, size=(ntemps, nwalkers, 1))       
+    DEC = np.random.uniform(low=angle_min, high=angle_max, size=(ntemps, nwalkers, 1))      
 
     ## Ensure m1 > m2:
     for i in range(0,ntemps):
@@ -198,14 +226,11 @@ def get_p0(ntemps, ndim, nsteps, nwalkers, ecc=True):
                 pass
 
     ## Setting initial walker positions:
-    p0 = np.array([m1, m2, e_min, dist, iota, RA, DEC, phiRef])
+    p0 = np.array([m1, m2, e_min, dist, iota, RA, DEC])
     p0 = np.reshape(p0, (ndim,ntemps, nwalkers))
     p0 = np.swapaxes(p0, 2,1)
     p0 = np.swapaxes(p0, 0,2)
     
-    return p0
-
-def run_sampler(p0, ntemps, nwalkers, ndim, nsteps, data, PSD, fmin, fmax, deltaF):
     ## Setting up the sampler:
     betas = np.logspace(0, -ntemps, ntemps, base=10)
     sampler = PTSampler(ntemps, nwalkers, ndim, logL, logPrior, loglargs=[data, PSD, fmin, fmax, deltaF], a=10., betas=betas)
@@ -213,6 +238,7 @@ def run_sampler(p0, ntemps, nwalkers, ndim, nsteps, data, PSD, fmin, fmax, delta
     ## Running the sampler:
     print 'sampling underway...'
     (pos, lnprob, rstate) = sampler.run_mcmc(p0, nsteps)
+    print(pos,rstate)
     
     return sampler, pos, lnprob, rstate
 
@@ -221,11 +247,10 @@ def get_Evidence(sampler, pos, lnprob, rstate):
     Getting the evidence and Bayes factor:
     '''
     (lnZ_pt, dlnZ_pt) = sampler.thermodynamic_integration_log_evidence(fburnin=0.5)
-    print "lnZ_pt = {} +/- {}".format(lnZ_pt, dlnZ_pt)
     
     return lnZ_pt, dlnZ_pt
 
-def make_triangles(sampler, job):
+def make_triangles(sampler, job, ndim):
     ## Making corner plots:
     truths=[35.,30.,np.log10(0.1),300.,(10.*np.pi/180),(20.9375*np.pi/180.),(45.*np.pi/180.),0.]
     samples = sampler.chain[0]
