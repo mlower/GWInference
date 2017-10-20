@@ -1,0 +1,19 @@
+# GWInference
+------
+
+Welcome to the GWInference online backup. GWInference is a lightweight, yet powerful, pure python gravitational-wave parameter estimation code 
+
+### Getting started
+
+If this is your first time using git (or even if it isn't) you may want to check out some of the git tutorials on [Atlassian](https://www.atlassian.com/git).
+
+To get access to the code just clone the repo using:
+
+```
+git clone git@git.ligo.org:marcus.lower/GWInference.git
+```
+
+### Contributing
+
+It is not possible to push directly to `master`.
+If you have code which you want to be included in the repository it is recommended that you either fork the repository or work on a branch other than `master`.  More information can be found in the repository's [wiki](https://git.ligo.org/Monash/MonashGWTools/wikis/contributing).
