@@ -15,9 +15,9 @@ job = parser.parse_args()
 
 ## Setting up sampling parameters:
 ntemps = 16
-nwalkers = 500
+nwalkers = 20
 ndim = 7
-nsteps = 2000
+nsteps = 20
 
 ## Waveform parameters:
 fmax = 512.
@@ -50,13 +50,13 @@ print 'time taken = ',t2-t1
 
 ## save samples
 
-file = 'samples/samples_e_'+str(job.filename)
-with open(file, 'wb') as handle:
-    pickle.dump(sampler_e, handle, protocol=pickle.HIGHEST_PROTOCOL)
+#file = 'samples/samples_e_'+str(job.filename)
+#with open(file, 'wb') as handle:
+#    pickle.dump(sampler_e, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-file = 'samples/samples_0_'+str(job.filename)
-with open(file, 'wb') as handle:
-    pickle.dump(sampler_0, handle, protocol=pickle.HIGHEST_PROTOCOL)
+#file = 'samples/samples_0_'+str(job.filename)
+#with open(file, 'wb') as handle:
+#    pickle.dump(sampler_0, handle, protocol=pickle.HIGHEST_PROTOCOL)
     
 lnZe_pt, dlnZe_pt = gwi.get_Evidence(sampler_e, pos, lnprob, rstate)
 print "lnZe_pt = {} +/- {}".format(lnZe_pt, dlnZe_pt)
@@ -65,9 +65,12 @@ print "lnZ0_pt = {} +/- {}".format(lnZ0_pt, dlnZ0_pt)
 
 lnBF = lnZe_pt - lnZ0_pt
 BF = np.exp(lnBF)
+test = (np.exp(lnZe_pt))/(np.exp(lnZ0_pt))
 
 print "lnBF = {} ".format(lnBF)
 print "BF = {} ".format(BF)
+print ""
+print'test = ',test
 
 np.savetxt('samples/BayesFactor/logEvidence_and_logBF_'+str(job.filename)+'.txt',np.c_[lnZe_pt, dlnZe_pt, dlnZ0_pt, dlnZ0_pt, BF])
 

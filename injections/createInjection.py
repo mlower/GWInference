@@ -12,7 +12,7 @@ def make_waveform(eccen, job):
     '''
     Generates an eccentric timesries
     '''
-    cmde = ["/bin/lalsim-inspiral -a EccentricFD -F -O -1 -u 0 -f 10 -r 20 -e "+str(eccen)+" -R 1024. -m1 35 -m2 30 -i 10 -d 410 > waveformInjection_"+job+"/signal.dat"]
+    cmde = ["/bin/lalsim-inspiral -a EccentricFD -F -O -1 -u 0 -f 10 -r 20 -e "+str(eccen)+" -R 1024. -m1 35 -m2 30 -i 0 -d 410 > waveformInjection_"+job+"/signal.dat"]
     cmde = ''.join(cmde)
     os.system(cmde)
     
@@ -48,13 +48,13 @@ inj = parser.parse_args()
 
 os.system("mkdir waveformInjection_"+str(inj.filename))
 
-min_e,max_e = np.log10(1e-7),np.log10(0.5)
+min_e,max_e = np.log10(1e-6),np.log10(0.5)
 eccen = round(10**(np.random.uniform(low=min_e,high=max_e,size=1)),10)
 
 make_waveform(eccen, str(inj.filename))
 
-RA = 20.9375
-DEC = 45.
+RA = 90.#20.9375
+DEC = 90.#45.
 psi = 0.
 epoch = 1000000008
 

@@ -26,7 +26,7 @@ import MonashGWTools.tools as tools
 ## Minimum + maximum thresholds:
 m1_min, m1_max = 25, 45
 m2_min, m2_max = 20, 40
-ecc_min, ecc_max = np.log10(1.e-11),np.log10(0.5)
+ecc_min, ecc_max = np.log10(1.e-6),np.log10(0.5)
 angle_min, angle_max = 0., np.pi*2.
 dist_min, dist_max = 50, 3000.
 
@@ -207,7 +207,7 @@ def run_sampler(data, PSD, fmin, fmax, deltaF, ntemps, ndim, nsteps, nwalkers, e
     m2 =  np.random.uniform(low=m2_min, high=m2_max, size=(ntemps, nwalkers, 1))
     
     if ecc == True:
-        ecc_min, ecc_max = np.log10(1.e-11),np.log10(0.5)
+        ecc_min, ecc_max = np.log10(1.e-6),np.log10(0.5)
         e_min = np.random.uniform(low=ecc_min, high=ecc_max, size=(ntemps, nwalkers, 1))
     else:
         e_min = np.zeros((ntemps, nwalkers, 1))
@@ -233,12 +233,12 @@ def run_sampler(data, PSD, fmin, fmax, deltaF, ntemps, ndim, nsteps, nwalkers, e
     
     ## Setting up the sampler:
     betas = np.logspace(0, -ntemps, ntemps, base=10)
-    sampler = PTSampler(ntemps, nwalkers, ndim, logL, logPrior, loglargs=[data, PSD, fmin, fmax, deltaF], a=10., betas=betas)
+    sampler = PTSampler(ntemps, nwalkers, ndim, logL, logPrior, loglargs=[data, PSD, fmin, fmax, deltaF], threads=32, a=10., betas=betas)
 
     ## Running the sampler:
     print 'sampling underway...'
     (pos, lnprob, rstate) = sampler.run_mcmc(p0, nsteps)
-    print(pos,rstate)
+    #print(pos,rstate)
     
     return sampler, pos, lnprob, rstate
 
@@ -252,8 +252,8 @@ def get_Evidence(sampler, pos, lnprob, rstate):
 
 def make_triangles(sampler, job, ndim):
     ## Making corner plots:
-    truths=[35.,30.,np.log10(0.1),300.,(10.*np.pi/180),(20.9375*np.pi/180.),(45.*np.pi/180.),0.]
+    truths=[35.,30.,np.log10(0.1),300.,(0.*np.pi/180),(90*np.pi/180.),(90.*np.pi/180.)]
     samples = sampler.chain[0]
     samples = samples[:, 100:, :].reshape(-1, ndim)
-    fig = corner.corner(samples,labels=['m1', 'm2', 'log$_{10}$e', 'dist', 'iota', 'RA', 'DEC', '$\phi_{ref}$'],show_titles=True,quantiles=[0.16, 0.5, 0.84], truths=truths)
+    fig = corner.corner(samples,labels=['m1', 'm2', 'log$_{10}$e', 'dist', 'iota', 'RA', 'DEC'],show_titles=True,quantiles=[0.16, 0.5, 0.84], truths=truths)
     fig.savefig("posteriors/triangle_"+str(job.filename)+".png")
