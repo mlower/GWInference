@@ -1,11 +1,13 @@
 universe = vanilla
+request_cpus = 2
+request_memory = 32768
 executable = /home/marcus.lower/public_html/projects/emceeSURF/GWInference/bash_workaround.sh
+arguments = $(jobNumber)
+getenv = True
+accounting_group_user = marcus.lower
+accounting_group = ligo.sim.o2.cbc.explore.test
 log = /home/marcus.lower/public_html/projects/emceeSURF/GWInference/logs/condor.log
 error = /home/marcus.lower/public_html/projects/emceeSURF/GWInference/logs/condor_$(jobNumber).err
 output = /home/marcus.lower/public_html/projects/emceeSURF/GWInference/logs/condor_$(jobNumber).out
-arguments = $(jobNumber)
-getenv = True
-accounting_group = ligo.sim.o2.cbc.explore.test
 notification = error
-request_memory = 40000
 queue 1

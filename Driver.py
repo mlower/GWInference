@@ -15,9 +15,9 @@ job = parser.parse_args()
 
 ## Setting up sampling parameters:
 ntemps = 16
-nwalkers = 20
+nwalkers = 500
 ndim = 7
-nsteps = 20
+nsteps = 2000
 
 ## Waveform parameters:
 fmax = 512.
