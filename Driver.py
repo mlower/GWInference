@@ -26,7 +26,7 @@ Fs = 2*fmax
 deltaF = 1./8.
 
 ## Load in data from file:
-data_file = np.load('waveformInjection_'+str(job.filename)+'/injectionFFT_'+str(job.filename)+'.npy')
+data_file = np.load('Injection_'+str(job.filename)+'/injectionFFT_'+str(job.filename)+'.npy')
 data = data_file[:,1]
 data = data[:int(fmax/deltaF)+1]
 freq = data_file[:,0].real[:int(fmax/deltaF)+1]

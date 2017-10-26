@@ -26,7 +26,7 @@ import MonashGWTools.tools as tools
 ## Minimum + maximum thresholds:
 m1_min, m1_max = 25, 45
 m2_min, m2_max = 20, 40
-ecc_min, ecc_max = np.log10(1.e-6),np.log10(0.5)
+ecc_min, ecc_max = np.log10(1.e-3),np.log10(0.5)
 angle_min, angle_max = 0., np.pi*2.
 dist_min, dist_max = 50, 3000.
 
@@ -207,7 +207,7 @@ def run_sampler(data, PSD, fmin, fmax, deltaF, ntemps, ndim, nsteps, nwalkers, e
     m2 =  np.random.uniform(low=m2_min, high=m2_max, size=(ntemps, nwalkers, 1))
     
     if ecc == True:
-        ecc_min, ecc_max = np.log10(1.e-6),np.log10(0.5)
+        ecc_min, ecc_max = np.log10(1.e-3),np.log10(0.5)
         e_min = np.random.uniform(low=ecc_min, high=ecc_max, size=(ntemps, nwalkers, 1))
     else:
         e_min = np.zeros((ntemps, nwalkers, 1))

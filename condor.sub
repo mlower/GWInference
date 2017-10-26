@@ -1,5 +1,4 @@
 universe = vanilla
-request_cpus = 2
 request_memory = 32768
 executable = /home/marcus.lower/public_html/projects/emceeSURF/GWInference/bash_workaround.sh
 arguments = $(jobNumber)

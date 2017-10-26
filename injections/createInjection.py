@@ -8,12 +8,13 @@ import lal
 import waveforms as wv
 import tools as tools
 
-def make_waveform(eccen, job):
+def make_waveform(m1, m2, eccen, dist, job):
     '''
     Generates an eccentric timesries
     '''
-    cmde = ["/bin/lalsim-inspiral -a EccentricFD -F -O -1 -u 0 -f 10 -r 20 -e "+str(eccen)+" -R 1024. -m1 35 -m2 30 -i 0 -d 410 > waveformInjection_"+job+"/signal.dat"]
+    cmde = ["/bin/lalsim-inspiral -a EccentricFD -F -O -1 -u 0 -f 10 -r 20 -e "+str(eccen)+" -R 1024. -m1 "+str(m1)+" -m2 "+str(m2)+" -i 0 -d "+str(dist)+" > Injection_"+job+"/signal.dat"]
     cmde = ''.join(cmde)
+    print(cmde)
     os.system(cmde)
     
     
@@ -46,26 +47,32 @@ parser = argparse.ArgumentParser(description='Setting name of output file.')
 parser.add_argument('-f','--file',type=str,required=True,dest='filename',help='filename output')
 inj = parser.parse_args()
 
-os.system("mkdir waveformInjection_"+str(inj.filename))
+os.system("mkdir Injection_"+str(inj.filename))
 
-min_e,max_e = np.log10(1e-6),np.log10(0.5)
+m1 = 35.
+m2 = 30.
+dist = 410.
+
+min_e,max_e = np.log10(1.e-3),np.log10(0.5)
 eccen = round(10**(np.random.uniform(low=min_e,high=max_e,size=1)),10)
 
-make_waveform(eccen, str(inj.filename))
+make_waveform(m1, m2, eccen, dist, str(inj.filename))
 
 RA = 90.#20.9375
 DEC = 90.#45.
 psi = 0.
 epoch = 1000000008
 
-data = np.loadtxt('waveformInjection_'+str(inj.filename)+'/signal.dat')
+data = np.loadtxt('Injection_'+str(inj.filename)+'/signal.dat')
 deltaF = data[1,0] - data[0,0]
 
 data_p = data[:,1] + 1j*data[:,2]
 data_c = data[:,3] + 1j*data[:,4]
 data_t = detector_strain(data_p, data_c, RA, DEC, psi, epoch, deltaF)
 
-output = 'waveformInjection_'+str(inj.filename)+'/injectionFFT_'+str(inj.filename)+'.npy'
+output = 'Injection_'+str(inj.filename)+'/injectionFFT_'+str(inj.filename)+'.npy'
 np.save(output,np.c_[data[:,0],data_t])
+
+np.savetxt('Injection_'+str(inj.filename)+'/true_parameters',np.c_[m1,m2,eccen,dist,RA,DEC])
 
 print("Injection made")

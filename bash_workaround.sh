@@ -9,8 +9,13 @@ fi
 
 unset PYTHONHOME
 
-/home/marcus.lower/src/pycbc/bin/python /home/marcus.lower/public_html/projects/emceeSURF/GWInference/injections/createInjection.py -f $1
+job="150914_"$1
 
-/home/marcus.lower/src/pycbc/bin/python /home/marcus.lower/public_html/projects/emceeSURF/GWInference/Driver.py -f $1
+
+/home/marcus.lower/src/pycbc/bin/python /home/marcus.lower/public_html/projects/emceeSURF/GWInference/injections/createInjection.py -f $job
+
+/home/marcus.lower/src/pycbc/bin/python /home/marcus.lower/public_html/projects/emceeSURF/GWInference/Driver.py -f $job
+
+/home/marcus.lower/src/pycbc/bin/python /home/marcus.lower/public_html/projects/emceeSURF/GWInference/combineResults.py -f $job
 
 echo "Job finished!" >> $OUTPUTFILE
