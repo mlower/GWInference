@@ -13,6 +13,7 @@ from emcee.utils import MPIPool
 
 import os, sys
 import time
+import pickle
 
 import matplotlib
 matplotlib.use('Agg')
@@ -33,14 +34,14 @@ def mc_eta_to_m1m2(mc, eta):
     else:
         return 1., 500.
 
-def gen_waveform(phiRef, deltaF, m1, m2, fmin, fmax, iota, dist, e_min):
+def gen_waveform(deltaF, m1, m2, fmin, fmax, iota, dist, e_min):
 
     fref = 20.
     m1 *= lal.lal.MSUN_SI
     m2 *= lal.lal.MSUN_SI
     dist = 1e6*lal.lal.PC_SI*dist
     phaseO = 1
-    e_min = 0.
+    phiRef = 0.
     
     meanPerAno = 0.0
     longAscNodes = 0.0
@@ -55,7 +56,7 @@ def gen_waveform(phiRef, deltaF, m1, m2, fmin, fmax, iota, dist, e_min):
     
     return hplus, hcross
 
-def detector_strain(h_p, h_c, RA, DEC, psi, epoch):
+def detector_strain(h_p, h_c, RA, DEC, psi, epoch, deltaF):
     
     tgps = lal.LIGOTimeGPS(epoch)
     gmst = lal.GreenwichMeanSiderealTime(tgps)
@@ -114,9 +115,8 @@ def logPrior(x):
     iota = x[4]
     RA = x[5]
     DEC = x[6]
-    phiRef = x[7]
 
-    if m1 >= m1_min and m1 <= m1_max and m2 <= m2_max and m2 >= m2_min and e_min <= ecc_max and e_min >= ecc_min and dist <= dist_max and dist >= dist_min and iota <= angle_max and iota >= angle_min and RA <= angle_max and RA >= angle_min and DEC <= angle_max and DEC >= angle_min and phiRef <= angle_max and phiRef >= angle_min and m1 > m2 :
+    if m1 >= m1_min and m1 <= m1_max and m2 <= m2_max and m2 >= m2_min and e_min <= ecc_max and e_min >= ecc_min and dist <= dist_max and dist >= dist_min and iota <= angle_max and iota >= angle_min and RA <= angle_max and RA >= angle_min and DEC <= angle_max and DEC >= angle_min and m1 > m2 :
         
         eta = (m1*m2)/((m1+m2)**2.)
         
@@ -137,17 +137,16 @@ def logL(x, data, PSD, fmin, fmax, deltaF):
     iota = x[4]
     RA = x[5]
     DEC = x[6]
-    phiRef = x[7]
 
-    if m1 >= m1_min and m1 <= m1_max and m2 <= m2_max and m2 >= m2_min and e_min <= ecc_max and e_min >= ecc_min and dist <= dist_max and dist >= dist_min and iota <= angle_max and iota >= angle_min and RA <= angle_max and RA >= angle_min and DEC <= angle_max and DEC >= angle_min and phiRef <= angle_max and phiRef >= angle_min and m1 > m2 :
+    if m1 >= m1_min and m1 <= m1_max and m2 <= m2_max and m2 >= m2_min and e_min <= ecc_max and e_min >= ecc_min and dist <= dist_max and dist >= dist_min and iota <= angle_max and iota >= angle_min and RA <= angle_max and RA >= angle_min and DEC <= angle_max and DEC >= angle_min and m1 > m2 :
                   
         # generate the waveform:
         e_min = 10**(e_min)
-        hp, hc = gen_waveform(phiRef, deltaF, m1, m2, fmin, fmax, iota, dist, e_min)
+        hp, hc = gen_waveform(deltaF, m1, m2, fmin, fmax, iota, dist, e_min)
                
         # Start time of data + strain in detector frame:
         epoch = 1000000008
-        htilde = detector_strain(hp, hc, RA, DEC, 0., epoch)
+        htilde = detector_strain(hp, hc, RA, DEC, 0., epoch, deltaF)
 
         # make len(htilde) = len(data) by appending zeroes
         htilde, data = make_arr_samesize(htilde, data)
@@ -160,9 +159,6 @@ def logL(x, data, PSD, fmin, fmax, deltaF):
         
         # log(Likelihood):
         logL = logsumexp( scores ).real - 0.5*( hh + dd ) + np.log(1./(2.*fmax))
-        
-        
-        
         return logL
         
     else:
@@ -172,7 +168,7 @@ def logL(x, data, PSD, fmin, fmax, deltaF):
 ## Setting up sampling parameters:
 ntemps = 16
 nwalkers = 500
-ndim = 8
+ndim = 7
 nsteps = 2000
 
 ## Waveform parameters:
@@ -196,27 +192,21 @@ PSD = PSD_interp_func(freq)
 ## Minimum + maximum thresholds:
 m1_min, m1_max = 25, 45
 m2_min, m2_max = 20, 40
-ecc_min, ecc_max = np.log10(1.e-5),np.log10(0.5)
+ecc_min, ecc_max = np.log10(1.e-3),np.log10(0.5)
 angle_min, angle_max = 0., np.pi*2.
 dist_min, dist_max = 50, 3000.
-
-## Setting parameters:
-m1 = np.random.uniform(low=m1_min, high=m1_max, size=(ntemps, nwalkers, 1))
+    
+m1 = np.random.uniform(low=(m1_min+5), high=m1_max, size=(ntemps, nwalkers, 1))
 m2 =  np.random.uniform(low=m2_min, high=m2_max, size=(ntemps, nwalkers, 1))
 
-#if ecc = True:
 e_min = np.random.uniform(low=ecc_min, high=ecc_max, size=(ntemps, nwalkers, 1))
-#else:
-#    e_min = np.zeros((ntemps, nwalkers, 1))
     
 dist = np.random.uniform(low=dist_min, high=dist_max, size=(ntemps, nwalkers, 1))
 iota = np.random.uniform(low=angle_min, high=0.5*angle_max, size=(ntemps, nwalkers, 1))
-
 RA = np.random.uniform(low=angle_min, high=angle_max, size=(ntemps, nwalkers, 1))
-DEC = np.random.uniform(low=angle_min, high=angle_max, size=(ntemps, nwalkers, 1))
-psi = np.random.uniform(low=angle_min, high=angle_max, size=(ntemps, nwalkers, 1))
-phiRef = np.random.uniform(low=angle_min, high=angle_max, size=(ntemps, nwalkers, 1))       
+DEC = np.random.uniform(low=angle_min, high=angle_max, size=(ntemps, nwalkers, 1))      
 
+## Ensure m1 > m2:
 for i in range(0,ntemps):
     for k in range(0,nwalkers):
         if m2[i,k,0] >= m1[i,k,0]:
@@ -224,8 +214,8 @@ for i in range(0,ntemps):
         else:
             pass
 
-## Entering parameters:
-p0 = np.array([m1, m2, e_min, dist, iota, RA, DEC, phiRef])
+## Setting initial walker positions:
+p0 = np.array([m1, m2, e_min, dist, iota, RA, DEC])
 p0 = np.reshape(p0, (ndim,ntemps, nwalkers))
 p0 = np.swapaxes(p0, 2,1)
 p0 = np.swapaxes(p0, 0,2)
@@ -259,7 +249,7 @@ print t2-t1
 
 ## Plotting the posterior distributions:
 param_list = ['m1', 'm2', 'log$_{10}$e', 'distance']
-true_values = [35., 30., np.log10(0.1), 300.]
+true_values = [35., 30., np.log10(0.1), 410.]
 
 for i in range(4):
     plt.figure()
@@ -267,29 +257,35 @@ for i in range(4):
     plt.axvline(true_values[i])
     plt.title("%s"%(param_list[i]))
     plt.xlim(min(sampler.flatchain[i,:,i]),max(sampler.flatchain[i,:,i]))
-    plt.savefig("posteriers/%s.png"%param_list[i],dpi=200)
+    plt.savefig("posteriors/%s.png"%param_list[i],dpi=200)
 
 print('shape of sampler.chain = ',np.shape(sampler.chain))    
 
 ## Plotting walker:
 plt.clf()
 res=plt.plot(sampler.chain[0,:,:,0].T, '-', color='k', alpha=0.3)
-plt.savefig('posteriors/walker_m1.png',dpi=200)
+plt.axhline(35)
+plt.xlim(0,2000)
+plt.ylim(25,45)
+plt.xlabel('Steps',fontsize=14)
+plt.ylabel('m1',fontsize=14)
+plt.tight_layout()
+plt.savefig('posteriors/walker.png',dpi=300)
 
 ## Making corner plot:
 
 import corner
 print('making corner plots...')
-truths=[35.,30.,np.log10(0.1),300.,(10.*np.pi/180),(20.9375*np.pi/180.),(45.*np.pi/180.),0.]
+truths=[35.,30.,np.log10(0.1),410.,(0.*np.pi/180),(90*np.pi/180.),(90.*np.pi/180.)]
 samples = sampler.chain[0]
 samples = samples[:, 100:, :].reshape(-1, ndim)
-fig = corner.corner(samples,labels=['m1', 'm2', 'log$_{10}$e', 'dist', 'iota', 'RA', 'DEC', '$\phi_{ref}$'],show_titles=True,quantiles=[0.16, 0.5, 0.84], truths=truths)
+fig = corner.corner(samples,labels=['m1', 'm2', 'log$_{10}$e', 'dist', 'iota', 'RA', 'DEC'],show_titles=True,quantiles=[0.16, 0.5, 0.84], truths=truths)
 fig.savefig("posteriors/triangle.png")
 
-np.savetxt('posteriersevidence.txt', np.c_[lnZ_pt, dlnZ_pt, BF])
+np.savetxt('posteriorsevidence.txt', np.c_[lnZ_pt, dlnZ_pt, BF])
 
 with open('samples/NonCondorSample_DO_NOT_REMOVE_.pickle', 'wb') as handle:
-    pickle.dump(sampler, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    pickle.dump(sampler.flatchain, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 print(np.shape(lnprob))
 print('sampler = ',sampler)

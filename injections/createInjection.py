@@ -14,7 +14,6 @@ def make_waveform(m1, m2, eccen, dist, job):
     '''
     cmde = ["/bin/lalsim-inspiral -a EccentricFD -F -O -1 -u 0 -f 10 -r 20 -e "+str(eccen)+" -R 1024. -m1 "+str(m1)+" -m2 "+str(m2)+" -i 0 -d "+str(dist)+" > Injection_"+job+"/signal.dat"]
     cmde = ''.join(cmde)
-    print(cmde)
     os.system(cmde)
     
     

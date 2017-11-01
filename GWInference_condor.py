@@ -252,7 +252,7 @@ def get_Evidence(sampler, pos, lnprob, rstate):
 
 def make_triangles(sampler, job, ndim):
     ## Making corner plots:
-    truths=[35.,30.,np.log10(0.1),300.,(0.*np.pi/180),(90*np.pi/180.),(90.*np.pi/180.)]
+    truths=[35.,30.,np.log10(0.1),410.,(0.*np.pi/180),(90*np.pi/180.),(90.*np.pi/180.)]
     samples = sampler.chain[0]
     samples = samples[:, 100:, :].reshape(-1, ndim)
     fig = corner.corner(samples,labels=['m1', 'm2', 'log$_{10}$e', 'dist', 'iota', 'RA', 'DEC'],show_titles=True,quantiles=[0.16, 0.5, 0.84], truths=truths)

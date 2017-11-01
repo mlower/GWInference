@@ -47,16 +47,6 @@ print 'finished sampling with e = 0'
 
 t2=time.time()
 print 'time taken = ',t2-t1
-
-## save samples
-
-#file = 'samples/samples_e_'+str(job.filename)
-#with open(file, 'wb') as handle:
-#    pickle.dump(sampler_e, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-#file = 'samples/samples_0_'+str(job.filename)
-#with open(file, 'wb') as handle:
-#    pickle.dump(sampler_0, handle, protocol=pickle.HIGHEST_PROTOCOL)
     
 lnZe_pt, dlnZe_pt = gwi.get_Evidence(sampler_e, pos, lnprob, rstate)
 print "lnZe_pt = {} +/- {}".format(lnZe_pt, dlnZe_pt)

@@ -5,52 +5,36 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-dat15 = np.loadtxt('../samples/BayesFactor/logEvidence_and_logBF_15.txt')
-true15 = np.loadtxt('../waveformInjection_15/true_parameters')
-dat17 = np.loadtxt('../samples/BayesFactor/logEvidence_and_logBF_17.txt')
-true17 = np.loadtxt('../waveformInjection_17/true_parameters')
-dat20 = np.loadtxt('../samples/BayesFactor/logEvidence_and_logBF_20.txt')
-true20 = np.loadtxt('../waveformInjection_20/true_parameters')
-dat21 = np.loadtxt('../samples/BayesFactor/logEvidence_and_logBF_21.txt')
-true21 = np.loadtxt('../waveformInjection_21/true_parameters')
-dat25 = np.loadtxt('../samples/BayesFactor/logEvidence_and_logBF_25.txt')
-true25 = np.loadtxt('../waveformInjection_25/true_parameters')
-dat29 = np.loadtxt('../samples/BayesFactor/logEvidence_and_logBF_29.txt')
-true29 = np.loadtxt('../waveformInjection_29/true_parameters')
-dat31 = np.loadtxt('../samples/BayesFactor/logEvidence_and_logBF_31.txt')
-true31 = np.loadtxt('../waveformInjection_31/true_parameters')
-dat34 = np.loadtxt('../samples/BayesFactor/logEvidence_and_logBF_34.txt')
-true34 = np.loadtxt('../waveformInjection_34/true_parameters')
-dat36 = np.loadtxt('../samples/BayesFactor/logEvidence_and_logBF_36.txt')
-true36 = np.loadtxt('../waveformInjection_36/true_parameters')
-dat37 = np.loadtxt('../samples/BayesFactor/logEvidence_and_logBF_37.txt')
-true37 = np.loadtxt('../waveformInjection_37/true_parameters')
-dat63 = np.loadtxt('../samples/BayesFactor/logEvidence_and_logBF_63.txt')
-true63 = np.loadtxt('../waveformInjection_63/true_parameters')
-dat86 = np.loadtxt('../samples/BayesFactor/logEvidence_and_logBF_86.txt')
-true86 = np.loadtxt('../waveformInjection_86/true_parameters')
-dat88 = np.loadtxt('../samples/BayesFactor/logEvidence_and_logBF_88.txt')
-true88 = np.loadtxt('../waveformInjection_88/true_parameters')
-dat89 = np.loadtxt('../samples/BayesFactor/logEvidence_and_logBF_89.txt')
-true89 = np.loadtxt('../waveformInjection_89/true_parameters')
-dat91 = np.loadtxt('../samples/BayesFactor/logEvidence_and_logBF_91.txt')
-true91 = np.loadtxt('../waveformInjection_91/true_parameters')
-dat92 = np.loadtxt('../samples/BayesFactor/logEvidence_and_logBF_92.txt')
-true92 = np.loadtxt('../waveformInjection_92/true_parameters')
+data1 = np.loadtxt('../output/GW150914.dat')
+Ecc1 = data1[:,2]
+logEcc1 = np.log10(Ecc1)
+lnBF1 = data1[:,-1]
 
-BF = [dat15[-1],dat17[-1],dat20[-1],dat21[-1],dat25[-1],dat29[-1],dat31[-1],dat34[-1],dat36[-1],dat37[-1],dat63[-1],dat86[-1],dat88[-1],dat89[-1],dat91[-1],dat92[-1]]
-lnBF = np.log(BF)
+data2 = np.loadtxt('../output/LVT151012.dat')
+Ecc2 = data2[:,2]
+logEcc2 = np.log10(Ecc2)
+lnBF2 = data2[:,-1]
 
-Ecc = [true15[2],true17[2],true20[2],true21[2],true25[2],true29[2],true31[2],true34[2],true36[2],true37[2],true63[2],true86[2],true88[2],true89[2],true91[2],true92[2]]
-logEcc = np.log10(Ecc)
+data3 = np.loadtxt('../output/GW151226.dat')
+Ecc3 = data3[:,2]
+logEcc3 = np.log10(Ecc3)
+lnBF3 = data3[:,-1]
+
+data4 = np.loadtxt('../output/GW170104.dat')
+Ecc4 = data4[:,2]
+logEcc4 = np.log10(Ecc4)
+lnBF4 = data4[:,-1]
 
 plt.clf()
 plt.tick_params(axis='both',which='both',direction='in',bottom='on',top='on',left='on',right='on')
 #plt.rcParams['text.usetex'] = True
 #plt.rcParams['text.latex.unicode'] = True
-plt.plot(logEcc,lnBF,ls='None',marker='^',color='b')
+plt.plot(logEcc1,lnBF1,ls='None',marker='^',color='b',markerfacecolor='none')
+plt.plot(logEcc2,lnBF2,ls='None',marker='s',color='r',markerfacecolor='none')
+plt.plot(logEcc3,lnBF3,ls='None',marker='o',color='g',markerfacecolor='none')
+plt.plot(logEcc4,lnBF4,ls='None',marker='h',color='m',markerfacecolor='none')
 plt.axhline(8,color='k',ls='--',lw=1)
-plt.xlim(-7,0)
+plt.xlim(-3.1,0.1)
 #plt.ylim(-5,10)
 plt.rcParams['xtick.labelsize'] = 14
 plt.rcParams['ytick.labelsize'] = 14
