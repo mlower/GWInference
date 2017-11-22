@@ -40,4 +40,4 @@ These last two methods will also require altering or removing the following line
 /path/to/python/bin/python /path/to/directory/GWInference/createInjection.py -f $job
 ```
 
-Ina addition, modifications will have to be made to `GWInference_condor.py`/`GWInference_MPI.py` and `combineResults.py` for carrying out PE using non-eccentric approximants and other parameters (e.g. tidal effects or spin).
+In addition, modifications will have to be made to `GWInference_condor.py`/`GWInference_MPI.py` and `combineResults.py` for carrying out PE using non-eccentric approximants and other parameters (e.g. tidal effects or spin).
