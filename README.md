@@ -27,11 +27,9 @@ To set-up a large Condor run, go into the `condor.sub`, `bash_workaround.sh` and
 
 For more information on how to use Condor, refer to these handy tutorials by [Eric Thrane](http://users.monash.edu.au/~erict/Resources/condor/) and [Sylvia Biscoveanu](http://users.monash.edu.au/~erict/Resources/condor/MyFirstCondor/your%20first%20condor%20submission.html).
 
-[The following will be made easier in a future update:]
+**[The following will be made easier in a future update:]**
 The injected waveforms that parameter estimation is carried out on are created by `createInjection.py`. It is currently set up to generate Fourier domain waveforms using the `EccentricFD` approximant with the component masses, eccentricity, distance, sky-location, polarisation angle and epoch specified in `inj_parameters.txt`. A different waveform approximant can be swapped in by changing the parameters and specified approximant in the `make_waveform` function of `createInjection.py`.
 
 One could also write a separate script following the advice in the [CBC wiki](https://www.lsc-group.phys.uwm.edu/ligovirgo/cbcnote/Waveforms) or [pyCBC documentation](https://ligo-cbc.github.io/pycbc/latest/html/waveform.html)
 
 Alternatively, if you have access to MonashGWTools, waveforms can be generated using the `waveform.py` script.
-
-<span style="color:red">cardinals</span>
