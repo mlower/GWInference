@@ -35,7 +35,9 @@ One could also write a separate script following the advice in the [CBC wiki](ht
 
 Alternatively, if you have access to MonashGWTools, waveforms can be generated using the `waveform.py` script.
 
-These last two methods will require altering or removing the following line in `bash_workaround.sh`:
+These last two methods will also require altering or removing the following line in `bash_workaround.sh`:
 ```
 /path/to/python/bin/python /path/to/directory/GWInference/createInjection.py -f $job
 ```
+
+Ina addition, modifications will have to be made to `GWInference_condor.py`/`GWInference_MPI.py` and `combineResults.py` for carrying out PE using non-eccentric approximants and other parameters (e.g. tidal effects or spin).
