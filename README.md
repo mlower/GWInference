@@ -20,7 +20,7 @@ This code requires the [LAL](http://software.ligo.org/docs/lalsuite/lal/group__l
 ### Getting Started
 
 There are two ways to run this code on your own system: 
-1. Using mpi4py to run distribute a run over multiple CPUs, e.g. `I_MPI_SHM_LMT=shm mpirun -n 6 python GWInference_MPI.py`
+1. Using mpi4py to distribute a run over multiple CPUs, e.g. `I_MPI_SHM_LMT=shm mpirun -n 6 python GWInference_MPI.py`
 2. Using HTCondor to run multiple instances at once on multiple nodes.
 
 To set-up a large Condor run, go into the `condor.sub`, `bash_workaround.sh` and `makedag.pl` files and change the directory paths from `/home/marcus.lower/GWInference` to `/home/user.name/GWInference`. 
