@@ -190,9 +190,9 @@ PSD_interp_func = interp1d(PSD_file[:,0], PSD_file[:,1], bounds_error=False, fil
 PSD = PSD_interp_func(freq)
 #------------------------------------------------#  
 ## Minimum + maximum thresholds:
-m1_min, m1_max = 25, 45
-m2_min, m2_max = 20, 40
-ecc_min, ecc_max = np.log10(1.e-3),np.log10(0.5)
+m1_min, m1_max = 5, 50
+m2_min, m2_max = 5, 50
+ecc_min, ecc_max = np.log10(0.1),np.log10(0.5)
 angle_min, angle_max = 0., np.pi*2.
 dist_min, dist_max = 50, 3000.
     
@@ -276,7 +276,7 @@ plt.savefig('posteriors/walker.png',dpi=300)
 
 import corner
 print('making corner plots...')
-truths=[35.,30.,np.log10(0.1),410.,(0.*np.pi/180),(90*np.pi/180.),(90.*np.pi/180.)]
+truths=[35.,30.,np.log10(0.4),440.,(0.*np.pi/180),(90*np.pi/180.),(90.*np.pi/180.)]
 samples = sampler.chain[0]
 samples = samples[:, 100:, :].reshape(-1, ndim)
 fig = corner.corner(samples,labels=['m1', 'm2', 'log$_{10}$e', 'dist', 'iota', 'RA', 'DEC'],show_titles=True,quantiles=[0.16, 0.5, 0.84], truths=truths)
@@ -284,8 +284,8 @@ fig.savefig("posteriors/triangle.png")
 
 np.savetxt('posteriorsevidence.txt', np.c_[lnZ_pt, dlnZ_pt, BF])
 
-with open('samples/NonCondorSample_DO_NOT_REMOVE_.pickle', 'wb') as handle:
-    pickle.dump(sampler.flatchain, handle, protocol=pickle.HIGHEST_PROTOCOL)
+with open('samples/posteriors_DO_NOT_REMOVE_.pickle', 'wb') as handle:
+    pickle.dump(pos, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 print(np.shape(lnprob))
 print('sampler = ',sampler)

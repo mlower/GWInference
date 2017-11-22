@@ -9,7 +9,7 @@ fi
 
 unset PYTHONHOME
 
-job="150914_"$1
+job="170104_"$1
 
 
 /home/marcus.lower/src/pycbc/bin/python /home/marcus.lower/public_html/projects/emceeSURF/GWInference/injections/createInjection.py -f $job

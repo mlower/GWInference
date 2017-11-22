@@ -24,11 +24,11 @@ import MonashGWTools.tools as tools
 
 ## Setting parameters ##
 ## Minimum + maximum thresholds:
-m1_min, m1_max = 25, 45
-m2_min, m2_max = 20, 40
+m1_min, m1_max = 10, 50
+m2_min, m2_max = 10, 50
 ecc_min, ecc_max = np.log10(1.e-3),np.log10(0.5)
 angle_min, angle_max = 0., np.pi*2.
-dist_min, dist_max = 50, 3000.
+dist_min, dist_max = 100, 3000.
 
 #-----------------------------------------#
 
@@ -197,8 +197,8 @@ def run_sampler(data, PSD, fmin, fmax, deltaF, ntemps, ndim, nsteps, nwalkers, e
     '''
     Setting parameters: 
     '''
-    m1_min, m1_max = 25, 45
-    m2_min, m2_max = 20, 40
+    m1_min, m1_max = 5, 40
+    m2_min, m2_max = 5, 40
 
     angle_min, angle_max = 0., np.pi*2.
     dist_min, dist_max = 50, 3000.

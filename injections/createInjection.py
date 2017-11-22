@@ -48,9 +48,9 @@ inj = parser.parse_args()
 
 os.system("mkdir Injection_"+str(inj.filename))
 
-m1 = 35.
-m2 = 30.
-dist = 410.
+m1 = 31.2
+m2 = 19.4
+dist = 880.
 
 min_e,max_e = np.log10(1.e-3),np.log10(0.5)
 eccen = round(10**(np.random.uniform(low=min_e,high=max_e,size=1)),10)

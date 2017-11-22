@@ -62,7 +62,7 @@ print "BF = {} ".format(BF)
 print ""
 print'test = ',test
 
-np.savetxt('samples/BayesFactor/logEvidence_and_logBF_'+str(job.filename)+'.txt',np.c_[lnZe_pt, dlnZe_pt, dlnZ0_pt, dlnZ0_pt, BF])
+np.savetxt('samples/BayesFactor/logEvidence_and_logBF_'+str(job.filename)+'.txt',np.c_[lnZe_pt, dlnZe_pt, lnZ0_pt, dlnZ0_pt, BF])
 
 ## make corner plots:
 print "making corner plots..."

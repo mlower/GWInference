@@ -3,7 +3,9 @@ import glob
 import sys
 import os
 
-read_files = glob.glob("../GW170104/output/*.txt")
+read_files = glob.glob("output/results_job_*.txt")
+
+print(read_files)
 
 with open("output/GW170104.dat", "wb") as outfile:
     for f in read_files:

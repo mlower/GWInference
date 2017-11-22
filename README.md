@@ -15,6 +15,4 @@ git clone git@git.ligo.org:marcus.lower/GWInference.git
 
 For more information on	`emcee` and how it works checkout the [website](http://dfm.io/emcee/current/#).
 
-### Contributing
-
-It is not possible to push directly to `master`. In fact, unless you are Marcus Lower, you shouldn't even be able to access this repository. How did you get in here?
+This code requires the [LAL](http://software.ligo.org/docs/lalsuite/lal/group__lal__python.html) and [LALSuite](http://software.ligo.org/docs/lalsuite/lalsuite/) packages to be installed.
