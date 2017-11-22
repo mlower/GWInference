@@ -34,3 +34,8 @@ The injected waveforms that parameter estimation is carried out on are created b
 One could also write a separate script following the advice in the [CBC wiki](https://www.lsc-group.phys.uwm.edu/ligovirgo/cbcnote/Waveforms) or [pyCBC documentation](https://ligo-cbc.github.io/pycbc/latest/html/waveform.html)
 
 Alternatively, if you have access to MonashGWTools, waveforms can be generated using the `waveform.py` script.
+
+These last two methods will require altering or removing the following line in `bash_workaround.sh`:
+```
+/path/to/python/bin/python /path/to/directory/GWInference/createInjection.py -f $job
+```
