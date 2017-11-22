@@ -23,6 +23,6 @@ There are two ways to run this code on your own system:
 1. Using mpi4py to distribute a run over multiple CPUs, e.g. `I_MPI_SHM_LMT=shm mpirun -n 6 python GWInference_MPI.py`
 2. Using HTCondor to run multiple instances at once on multiple nodes.
 
-To set-up a large Condor run, go into the `condor.sub`, `bash_workaround.sh` and `makedag.pl` files and change the directory paths from `/home/marcus.lower/GWInference` to `/home/user.name/GWInference`. 
+To set-up a large Condor run, go into the `condor.sub`, `bash_workaround.sh` and `makedag.pl` files and change the directory paths from `/home/marcus.lower/GWInference` to `/path/to/directory/GWInference`. 
 
 For more information on how to use Condor, refer to these handy tutorials by [Eric Thrane](http://users.monash.edu.au/~erict/Resources/condor/) and [Sylvia Biscoveanu](http://users.monash.edu.au/~erict/Resources/condor/MyFirstCondor/your%20first%20condor%20submission.html).
