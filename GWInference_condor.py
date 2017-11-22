@@ -16,7 +16,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import corner
 
-sys.path.append('../../../..')
+sys.path.append('../')
 import MonashGWTools.waveforms as wv
 import MonashGWTools.tools as tools
 
@@ -255,5 +255,5 @@ def make_triangles(sampler, job, ndim):
     truths=[35.,30.,np.log10(0.1),410.,(0.*np.pi/180),(90*np.pi/180.),(90.*np.pi/180.)]
     samples = sampler.chain[0]
     samples = samples[:, 100:, :].reshape(-1, ndim)
-    fig = corner.corner(samples,labels=['m1', 'm2', 'log$_{10}$e', 'dist', 'iota', 'RA', 'DEC'],show_titles=True,quantiles=[0.16, 0.5, 0.84], truths=truths)
+    fig = corner.corner(samples,labels=['m1', 'm2', 'log$_{10}$e', 'dist', 'iota', 'RA', 'DEC'],smooth=1,show_titles=True,quantiles=[0.16, 0.5, 0.84], truths=truths)
     fig.savefig("posteriors/triangle_"+str(job.filename)+".png")

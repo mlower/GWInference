@@ -4,21 +4,24 @@ import sys, os, argparse
 import lalsimulation as lalsim
 import lal
 
-#sys.path.append('../../../../..')
-import waveforms as wv
-import tools as tools
+sys.path.append('../')
+
+import MonashGWTools.waveforms as wv
+import MonashGWTools.tools as tools
 
 def make_waveform(m1, m2, eccen, dist, job):
     '''
-    Generates an eccentric timesries
+    Generates an eccentric timesries using LALSimulation
     '''
-    cmde = ["/bin/lalsim-inspiral -a EccentricFD -F -O -1 -u 0 -f 10 -r 20 -e "+str(eccen)+" -R 1024. -m1 "+str(m1)+" -m2 "+str(m2)+" -i 0 -d "+str(dist)+" > Injection_"+job+"/signal.dat"]
+    cmde = ["/bin/lalsim-inspiral -a EccentricFD -F -O -1 -u 0 -f 10 -r 20 -e "+str(eccen)+" -R 1024. -m1 "+str(m1)+" -m2 "+str(m2)+" -i 0 -d "+str(dist)+" > injections/Injection_"+job+"/signal.dat"]
     cmde = ''.join(cmde)
     os.system(cmde)
     
     
 def detector_strain(h_p, h_c, RA, DEC, psi, epoch, deltaF):
-    
+    '''
+    Finds the strain of the event in the detector frame
+    '''
     tgps = lal.LIGOTimeGPS(epoch)
     gmst = lal.GreenwichMeanSiderealTime(tgps)
     
@@ -46,32 +49,34 @@ parser = argparse.ArgumentParser(description='Setting name of output file.')
 parser.add_argument('-f','--file',type=str,required=True,dest='filename',help='filename output')
 inj = parser.parse_args()
 
-os.system("mkdir Injection_"+str(inj.filename))
+## Creates folder for injection data:
+os.system("mkdir injections/Injection_"+str(inj.filename))
 
-m1 = 31.2
-m2 = 19.4
-dist = 880.
+## Import binary parameters:
+m1, m2, dist, RA, DEC, psi, epoch = np.loadtxt('inj_params.txt',unpack=True)
 
+print("m1 = ",m1," m2 = ",m2," dist = ",dist)
+
+## Randomly samples log(eccentricity):
 min_e,max_e = np.log10(1.e-3),np.log10(0.5)
 eccen = round(10**(np.random.uniform(low=min_e,high=max_e,size=1)),10)
 
+## Generates the data:
 make_waveform(m1, m2, eccen, dist, str(inj.filename))
 
-RA = 90.#20.9375
-DEC = 90.#45.
-psi = 0.
-epoch = 1000000008
 
-data = np.loadtxt('Injection_'+str(inj.filename)+'/signal.dat')
+## Processing and saving injection data:
+data = np.loadtxt('injections/Injection_'+str(inj.filename)+'/signal.dat')
 deltaF = data[1,0] - data[0,0]
 
 data_p = data[:,1] + 1j*data[:,2]
 data_c = data[:,3] + 1j*data[:,4]
 data_t = detector_strain(data_p, data_c, RA, DEC, psi, epoch, deltaF)
 
-output = 'Injection_'+str(inj.filename)+'/injectionFFT_'+str(inj.filename)+'.npy'
+output = 'injections/Injection_'+str(inj.filename)+'/injectionFFT_'+str(inj.filename)+'.npy'
 np.save(output,np.c_[data[:,0],data_t])
-
-np.savetxt('Injection_'+str(inj.filename)+'/true_parameters',np.c_[m1,m2,eccen,dist,RA,DEC])
+np.savetxt('injections/Injection_'+str(inj.filename)+'/true_parameters',np.c_[m1,m2,eccen,dist,RA,DEC])
 
 print("Injection made")
+
+

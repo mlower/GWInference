@@ -26,12 +26,12 @@ Fs = 2*fmax
 deltaF = 1./8.
 
 ## Load in data from file:
-data_file = np.load('Injection_'+str(job.filename)+'/injectionFFT_'+str(job.filename)+'.npy')
+data_file = np.load('injections/Injection_'+str(job.filename)+'/injectionFFT_'+str(job.filename)+'.npy')
 data = data_file[:,1]
 data = data[:int(fmax/deltaF)+1]
 freq = data_file[:,0].real[:int(fmax/deltaF)+1]
 
-PSD_file = np.loadtxt("../../../../MonashGWTools/NoiseCurves/aLIGO_ZERO_DET_high_P_psd.txt")
+PSD_file = np.loadtxt("../MonashGWTools/NoiseCurves/aLIGO_ZERO_DET_high_P_psd.txt")
 PSD = PSD_file[:,1][:int(fmax/deltaF)+1]
 PSD_interp_func = interp1d(PSD_file[:,0], PSD_file[:,1], bounds_error=False, fill_value=np.inf)
 PSD = PSD_interp_func(freq)

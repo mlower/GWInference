@@ -1,7 +1,6 @@
 ##
 import numpy as np
-import os, sys
-import argparse
+import os, sys, argparse
 
 ## get job number:
 parser = argparse.ArgumentParser(description='Setting name of output file.')
@@ -15,7 +14,5 @@ lnZe_pt, dlnZe_pt, dlnZ0_pt, dlnZ0_pt, BF = np.loadtxt('samples/BayesFactor/logE
 lnBF = np.log(BF)
 
 np.savetxt('output/results_job_'+str(job.filename)+'.txt',np.c_[m1,m2,ecc,dist,RA,DEC,lnZe_pt,dlnZe_pt,dlnZ0_pt,dlnZ0_pt,BF,lnBF])
-
-os.system("mv -R Injection_"+str(job.filename)+" /injections")
 
 print("Saved parameters")
