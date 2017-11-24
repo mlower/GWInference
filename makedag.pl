@@ -2,11 +2,11 @@
 
 $home = "/home/marcus.lower";
 $sub = "condor";
-$njobs = 100;
+$njobs = 3000;
 
 open(dag,">./run_Inference.dag");
 for ($i=0; $i<=$njobs; $i=$i+1) {
-    print dag "JOB $i /home/marcus.lower/public_html/projects/emceeSURF/GWInference/$sub.sub\n";
+    print dag "JOB $i /home/marcus.lower/GWInference/$sub.sub\n";
     print dag "VARS $i ";
     print dag "jobNumber=\"$i\" ";
     print dag "\n\n";

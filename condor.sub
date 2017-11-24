@@ -1,13 +1,13 @@
 universe = vanilla
 request_memory = 32768
 Requirements = regexp("E5-2650 v4", TARGET.cpuinfo_model_name)
-executable = /home/marcus.lower/public_html/projects/emceeSURF/GWInference/bash_workaround.sh
+executable = /home/marcus.lower/GWInference/bash_workaround.sh
 arguments = $(jobNumber)
 getenv = True
 accounting_group_user = marcus.lower
 accounting_group = ligo.sim.o2.cbc.explore.test
-log = /home/marcus.lower/public_html/projects/emceeSURF/GWInference/logs/condor.log
-error = /home/marcus.lower/public_html/projects/emceeSURF/GWInference/logs/condor_$(jobNumber).err
-output = /home/marcus.lower/public_html/projects/emceeSURF/GWInference/logs/condor_$(jobNumber).out
+log = /home/marcus.lower/GWInference/logs/condor.log
+error = /home/marcus.lower/GWInference/logs/condor_$(jobNumber).err
+output = /home/marcus.lower/GWInference/logs/condor_$(jobNumber).out
 notification = error
 queue 1
