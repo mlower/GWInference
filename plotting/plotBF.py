@@ -1,6 +1,6 @@
 ## Plotting ln(Bayes Factor):
 import numpy as np
-import os, sys, argparse
+import os, sys, argparse, glob
 from scipy.interpolate import interp1d
 
 import matplotlib
@@ -19,10 +19,12 @@ with open('../output/'+str(job.filename)+'.dat', "wb") as outfile:
             outfile.write(infile.read())
 
 data = np.loadtxt('../output/'+str(job.filename)+'.dat')
-data = data[data1[:,2].argsort()]
+data = data[data[:,2].argsort()]
 Ecc = data[:,2]
-logEcc = np.log10(Ecc1)
+logEcc = np.log10(Ecc)
 lnBF = data[:,-1]
+
+print(data[:,-1])
 
 plt.clf()
 plt.tick_params(axis='both',which='both',direction='in',bottom='on',top='on',left='on',right='on')
