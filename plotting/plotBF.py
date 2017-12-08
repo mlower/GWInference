@@ -31,8 +31,8 @@ plt.tick_params(axis='both',which='both',direction='in',bottom='on',top='on',lef
 plt.plot(logEcc,lnBF,ls='None',marker='^',color='b',markerfacecolor='none',label='GW150914')
 plt.plot(logEcc,lnBF,color='b')
 plt.axhline(8,color='k',ls='--',lw=1)
-plt.xlim(-3.1,0.1)
-#plt.ylim(-5,10)
+#plt.xlim(-3.1,0.1)
+plt.ylim(-8,40)
 plt.rcParams['xtick.labelsize'] = 14
 plt.rcParams['ytick.labelsize'] = 14
 plt.ylabel(r'ln($\mathcal{B}$)',fontsize=16)

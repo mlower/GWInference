@@ -9,11 +9,11 @@ sys.path.append('../')
 import MonashGWTools.waveforms as wv
 import MonashGWTools.tools as tools
 
-def make_waveform(m1, m2, eccen, dist, job):
+def make_waveform(m1, m2, eccen, dist, iota, job):
     '''
     Generates an eccentric timesries using LALSimulation
     '''
-    cmde = ["/bin/lalsim-inspiral -a EccentricFD -F -O -1 -u 0 -f 10 -r 20 -e "+str(eccen)+" -R 1024. -m1 "+str(m1)+" -m2 "+str(m2)+" -i 0 -d "+str(dist)+" > Injection_"+job+"/signal.dat"]
+    cmde = ["/bin/lalsim-inspiral -a EccentricFD -F -O -1 -u 0 -f 10 -r 20 -e "+str(eccen)+" -R 1024. -m1 "+str(m1)+" -m2 "+str(m2)+" -i "+str(iota)+" -d "+str(dist)+" > Injection_"+job+"/signal.dat"]
     cmde = ''.join(cmde)
     os.system(cmde)
     
@@ -53,14 +53,14 @@ inj = parser.parse_args()
 os.system("mkdir Injection_"+str(inj.filename))
 
 ## Import binary parameters:
-m1, m2, dist, RA, DEC, psi, epoch = np.loadtxt('inj_params.txt',unpack=True)
+m1, m2, dist, iota, RA, DEC, psi, epoch = np.loadtxt('inj_params.txt',unpack=True)
 
 ## Randomly samples log(eccentricity):
-min_e,max_e = np.log10(1.e-4),np.log10(0.5)
+min_e,max_e = np.log10(1.e-3),np.log10(0.1)
 eccen = round(10**(np.random.uniform(low=min_e,high=max_e,size=1)),10)
 
 ## Generates the data:
-make_waveform(m1, m2, eccen, dist, str(inj.filename))
+make_waveform(m1, m2, eccen, dist, iota, str(inj.filename))
 
 
 ## Processing and saving injection data:

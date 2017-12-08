@@ -1,5 +1,6 @@
 universe = vanilla
-request_memory = 32768
+request_cpus = 16
+request_memory = 65536
 Requirements = regexp("E5-2650 v4", TARGET.cpuinfo_model_name)
 executable = /home/marcus.lower/GWInference/bash_workaround.sh
 arguments = $(jobNumber)

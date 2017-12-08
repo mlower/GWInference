@@ -14,8 +14,8 @@ parser.add_argument('-f','--file',type=str,required=True,dest='filename',help='f
 job = parser.parse_args()
 
 ## Setting up sampling parameters:
-ntemps = 16
-nwalkers = 500
+ntemps = 8
+nwalkers = 50
 ndim = 7
 nsteps = 2000
 
@@ -40,17 +40,21 @@ PSD = PSD_interp_func(freq)
 ## Running sampler + get log evidence & log Bayes factor:
 t1 = time.time()
 
-sampler_e, pos, lnprob, rstate = gwi.run_sampler(data, PSD, fmin, fmax, deltaF, ntemps, ndim, nsteps, nwalkers, ecc=True)
+#sampler_e, pos, lnprob, rstate = gwi.run_sampler(data, PSD, fmin, fmax, deltaF, ntemps, ndim, nsteps, nwalkers, ecc=True)
+lnZe_pt, dlnZe_pt = gwi.run_sampler(data, PSD, fmin, fmax, deltaF, ntemps, ndim, nsteps, nwalkers, job, ecc=True)
 print 'finished sampling with e > 0'
-sampler_0, pos, lnprob, rstate = gwi.run_sampler(data, PSD, fmin, fmax, deltaF, ntemps, ndim, nsteps, nwalkers, ecc=False)
-print 'finished sampling with e = 0'
+t2 = time.time()
+print 'time taken = ',t2 - t1
 
-t2=time.time()
-print 'time taken = ',t2-t1
+#sampler_0, pos, lnprob, rstate = gwi.run_sampler(data, PSD, fmin, fmax, deltaF, ntemps, ndim, nsteps, nwalkers, ecc=False)
+lnZ0_pt, dlnZ0_pt = gwi.run_sampler(data, PSD, fmin, fmax, deltaF, ntemps, ndim, nsteps, nwalkers, job, ecc=False)
+print 'finished sampling with e = 0'
+t3=time.time()
+print 'time taken = ',t3 - t2
     
-lnZe_pt, dlnZe_pt = gwi.get_Evidence(sampler_e, pos, lnprob, rstate)
+#lnZe_pt, dlnZe_pt = gwi.get_Evidence(sampler_e, pos, lnprob, rstate)
 print "lnZe_pt = {} +/- {}".format(lnZe_pt, dlnZe_pt)
-lnZ0_pt, dlnZ0_pt = gwi.get_Evidence(sampler_0, pos, lnprob, rstate)
+#lnZ0_pt, dlnZ0_pt = gwi.get_Evidence(sampler_0, pos, lnprob, rstate)
 print "lnZ0_pt = {} +/- {}".format(lnZ0_pt, dlnZ0_pt)
 
 lnBF = lnZe_pt - lnZ0_pt
@@ -65,7 +69,7 @@ print'test = ',test
 np.savetxt('samples/BayesFactor/logEvidence_and_logBF_'+str(job.filename)+'.txt',np.c_[lnZe_pt, dlnZe_pt, lnZ0_pt, dlnZ0_pt, BF])
 
 ## make corner plots:
-print "making corner plots..."
-gwi.make_triangles(sampler_e, job, ndim)
+#print "making corner plots..."
+#gwi.make_triangles(sampler_e, job, ndim)
 
 print "finished job "+str(job.filename)+"!"

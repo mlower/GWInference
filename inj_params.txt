@@ -1,5 +1,5 @@
 # Binary parameters for a simulated BBH signal
  
-#m1	#m2	#dist	#RA	#DEC	#psi	#epoch
+#m1	#m2	#dist	#iota	#RA	#DEC	#psi	#epoch
 #---------------------------------------------------------
-35.	30.	440.	90.	90.	0.	1000000008
+35.	30.	220.	90.	90.	90.	0.	1000000008

@@ -2,7 +2,7 @@
 
 $home = "/home/marcus.lower";
 $sub = "condor";
-$njobs = 3000;
+$njobs = 2;
 
 open(dag,">./run_Inference.dag");
 for ($i=0; $i<=$njobs; $i=$i+1) {
