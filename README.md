@@ -1,4 +1,4 @@
-# GWInference
+![GWinference](GWinference_logo.png)
 ------
 
 Welcome to the GWInference online backup. GWInference is a lightweight, yet powerful, pure python gravitational-wave parameter estimation code based around the `emcee` python package created by [Foreman-Mackey, et al. (2013)](https://arxiv.org/pdf/1202.3665.pdf).
