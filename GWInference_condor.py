@@ -7,6 +7,7 @@ import lal
 import lalsimulation as lalsim
 import emcee
 from emcee import PTSampler
+import GenWaveform as wv
 
 import os, sys
 import time
@@ -17,18 +18,23 @@ import matplotlib.pyplot as plt
 import corner
 
 sys.path.append('../')
-import MonashGWTools.waveforms as wv
 import MonashGWTools.tools as tools
 
 #-----------------------------------------#
 
-## Setting parameters ##
 ## Minimum + maximum thresholds:
-m1_min, m1_max = 5, 50
-m2_min, m2_max = 5, 50
-ecc_min, ecc_max = np.log10(1.e-4),np.log10(0.5)
-angle_min, angle_max = 0., np.pi*2.
-dist_min, dist_max = 50, 3000.
+m1_min = 1.0; m1_max = 100.0
+m2_min = 1.0; m2_max = 100.0
+dist_min = 10; dist_max = 1e4
+
+ecc_min = np.log10(1.e-4); ecc_max = np.log10(0.5)
+angle_min = 0.0; angle_max = np.pi*2.0
+
+#thresh = [[m1_min, m1_max],
+#         [m2_min, m2_max],
+#         [dist_min, dist_max],
+#         [ecc_min, ecc_max],
+#         [angle_min, angle_max]]
 
 #-----------------------------------------#
 
@@ -38,8 +44,10 @@ def gen_waveform(deltaF, m1, m2, fmin, fmax, iota, dist, e_min):
     m1 *= lal.lal.MSUN_SI
     m2 *= lal.lal.MSUN_SI
     dist = 1e6*lal.lal.PC_SI*dist
+    S1 = [0,0,0]
+    S2 = [0,0,0]
     phaseO = 1
-    phiRef = 0.
+    phiRef = np.pi
     
     meanPerAno = 0.0
     longAscNodes = 0.0
@@ -47,37 +55,12 @@ def gen_waveform(deltaF, m1, m2, fmin, fmax, iota, dist, e_min):
     
     WFdict = lal.CreateDict()
     
-    H = lalsim.SimInspiralChooseFDWaveform(m1, m2, 0, 0, 0, 0, 0, 0, dist, iota, phiRef, longAscNodes, e_min, meanPerAno, deltaF, fmin, fmax, fref, WFdict, approx)
+    H = lalsim.SimInspiralChooseFDWaveform(m1, m2, S1[0], S1[1], S1[2], S2[0], S2[1], S2[2], dist, iota, phiRef, longAscNodes, e_min, meanPerAno, deltaF, fmin, fmax, fref, WFdict, approx)
     
     hplus = H[0].data.data
     hcross = H[1].data.data
     
     return hplus, hcross
-
-def detector_strain(h_p, h_c, RA, DEC, psi, epoch, deltaF, ifo):
-    
-    epoch_GPS = lal.LIGOTimeGPS(epoch)
-    gmst = lal.GreenwichMeanSiderealTime(epoch_GPS)
-    
-    # Antenna response:
-    fplus, fcross = wv.AntennaResponse(RA, DEC, psi, epoch, ifo)
-    diff = lal.LALDetectorIndexLHODIFF
-    
-    timedelay = lal.TimeDelayFromEarthCenter(lal.CachedDetectors[diff].location, RA, DEC, epoch_GPS)
-    timeshift = epoch + timedelay
-    
-    #Calculate the observed strain at the detector, properly shifting the waveform from geocenter to detector frame.
-    h = np.zeros_like(h_p, dtype=complex)
-    pit = np.pi*timeshift
-    if timeshift != 0.0:
-        shift = complex(1.0, 0)
-        dshift = complex(-2.*np.sin(pit*deltaF)*np.sin(pit*deltaF), -2.*np.sin(pit*deltaF)*np.cos(pit*deltaF))
-        for i in xrange(0,h_p.size):
-            h[i] = shift*(fplus*h_p[i] + fcross*h_c[i])
-            shift += shift*dshift
-    else: h = (fplus*h_p) + (fcroh_c)
-        
-    return h, timedelay
 
 def make_arr_samesize(arr1,arr2):
     '''
@@ -97,10 +80,12 @@ def make_arr_samesize(arr1,arr2):
         arr2 = np.append(arr2,np.zeros(diff))
         len1 = np.size(arr2)
 
-    return arr1, arr2                
-                                                                             
-def LALInferenceCubeToFlatPrior(r, x1, x2):
-    return x1 + r * ( x2 - x1 );
+    return arr1, arr2
+
+def uniformPrior(var, varMin, varMax):
+    ## uniform prior
+    return 10**(varMin + var * (varMax - varMin))
+
 
 def logPrior(x):
     '''
@@ -114,15 +99,7 @@ def logPrior(x):
     RA = x[5]
     DEC = x[6]
 
-    if m1 >= m1_min and m1 <= m1_max and m2 <= m2_max and m2 >= m2_min and e_min <= ecc_max and e_min >= ecc_min and dist <= dist_max and dist >= dist_min and iota <= angle_max and iota >= angle_min and RA <= angle_max and RA >= angle_min and DEC <= angle_max and DEC >= angle_min and m1 > m2 :
-        
-        eta = (m1*m2)/((m1+m2)**2.)
-        
-        ##-- Flat Prior --###
-        logprior = 1.#np.log(((m1+m2)*(m1+m2))/((m1-m2)*pow(eta,3.0/5.0)) )
-        return logprior
-    
-    elif m1 >= m1_min and m1 <= m1_max and m2 <= m2_max and m2 >= m2_min and e_min == 0.0 and dist <= dist_max and dist >= dist_min and iota <= angle_max and iota >= angle_min and RA <= angle_max and RA >= angle_min and DEC <= angle_max and DEC >= angle_min and m1 > m2 :
+    if m1 >= m1_min and m1 <= m1_max and m2 <= m2_max and m2 >= m2_min and ((e_min <= ecc_max and e_min >= ecc_min) or e_min == 0.0) and dist <= dist_max and dist >= dist_min and iota <= angle_max and iota >= angle_min and RA <= angle_max and RA >= angle_min and DEC <= angle_max and DEC >= angle_min and m1 > m2 :
         
         eta = (m1*m2)/((m1+m2)**2.)
         
@@ -133,7 +110,7 @@ def logPrior(x):
     else:
         return -np.inf
 
-def logL(x, data, PSD, fmin, fmax, deltaF):
+def logL(x, dataH1, dataL1, PSD, fmin, fmax, deltaF):
     '''
     Generates the log likelihood
     '''
@@ -144,93 +121,27 @@ def logL(x, data, PSD, fmin, fmax, deltaF):
     iota = x[4]
     RA = x[5]
     DEC = x[6]
-
-    if m1 >= m1_min and m1 <= m1_max and m2 <= m2_max and m2 >= m2_min and e_min <= ecc_max and e_min >= ecc_min and dist <= dist_max and dist >= dist_min and iota <= angle_max and iota >= angle_min and RA <= angle_max and RA >= angle_min and DEC <= angle_max and DEC >= angle_min and m1 > m2 :
+    psi = 0.0
+    S1=[0,0,0]
+    S2=[0,0,0]
+    phi = np.pi
+    fRef = fmin
+    
+    if m1 >= m1_min and m1 <= m1_max and m2 <= m2_max and m2 >= m2_min and ((e_min <= ecc_max and e_min >= ecc_min) or e_min == 0.0) and dist <= dist_max and dist >= dist_min and iota <= angle_max and iota >= angle_min and RA <= angle_max and RA >= angle_min and DEC <= angle_max and DEC >= angle_min and m1 > m2 :
                   
         # Generate the waveform:
-        e_min = 10**(e_min)
-        hp, hc = gen_waveform(deltaF, m1, m2, fmin, fmax, iota, dist, e_min)
-               
-        # Start time of data + strain in detector frame:
-        epoch = 1000000008
+        tc = 1000000008
+        e_min = 10**(e_min)        
+        hp, hc = wv.GenFDWaveform(fmin, fmax, deltaF, dist, m1, m2, S1, S2, e_min, fRef, iota, phi, waveform='EccentricFD')
+        htildeH,f_arrH = wv.DetectorStrain(hp, hc, fmax, deltaF, RA, DEC, psi, tc, ifo='H1')       
         
-        # Strain at Hanford:
-        htildeH, timedelay_H = detector_strain(hp, hc, RA, DEC, 0., epoch, deltaF, ifo='H1')
-        
-        # Strain at Livingston
-        htildeL, timedelay_L = detector_strain(hp, hc, RA, DEC, 0., epoch, deltaF, ifo='L1')
-
-        # Make len(htilde) = len(data) by appending zeroes
-        htildeH, dataH = make_arr_samesize(htildeH, data)
-        htildeL, dataL = make_arr_samesize(htildeL, data)
-        
-        # Adjust Fourier spectra for time-delay b/w H1 & L1:
-        fseries = np.linspace(0, fmax, int(fmax/deltaF)+1)
-        htildeH = np.exp(1j*np.pi*2*fseries*timedelay_H)
-        htildeL = np.exp(1j*np.pi*2*fseries*timedelay_L)
         ##-- Likelihood --###
         
-        dh_H = deltaF*4*data.conjugate()*htildeH / PSD
-        hh_H = deltaF*4.*np.sum( htildeH.conjugate()*htildeH/PSD ).real
-        dd_H = deltaF*4.*np.sum( dataH.conjugate()*dataH/PSD ).real
-        
-        dh_L = deltaF*4*data.conjugate()*htildeL / PSD
-        hh_L = deltaF*4.*np.sum( htildeL.conjugate()*htildeL/PSD ).real
-        dd_L = deltaF*4.*np.sum( dataL.conjugate()*dataL/PSD ).real
-        
-        scores_H = len(dataH)*( -0.5* ( -2*np.fft.irfft(dh_H)) )
-        scores_L = len(dataL)*( -0.5* ( -2*np.fft.irfft(dh_L)) )
-        
-        # log(Likelihood):
-        logL = logsumexp(scores_H + scores_L).real - 0.5*(hh_H + hh_L + dd_H + dd_L) + np.log(2./(2.*fmax)) 
-        # -0.5 * ( 4*deltaF*np.vdot(data - htilde, (data - htilde)/PSD) - 4*deltaF*np.vdot(data, data/PSD) ).real
+        logL = -0.5 * (4*deltaF*np.vdot(dataH1 - htildeH, (dataH1 - htildeH)/PSD)).real
+        print(logL)
         return logL
- 
-    elif m1 >= m1_min and m1 <= m1_max and m2 <= m2_max and m2 >= m2_min and e_min == 0.0 and dist <= dist_max and dist >= dist_min and iota <= angle_max and iota >= angle_min and RA <= angle_max and RA >= angle_min and DEC <= angle_max and DEC >= angle_min and m1 > m2 :    
-        
-        # Generate the waveform:
-        hp, hc = gen_waveform(deltaF, m1, m2, fmin, fmax, iota, dist, e_min)
-               
-        # Start time of data + strain in detector frame:
-        epoch = 1000000008
-        
-        # Strain at Hanford:
-        htildeH, timedelay_H = detector_strain(hp, hc, RA, DEC, 0., epoch, deltaF, ifo='H1')
-        
-        # Strain at Livingston
-        htildeL, timedelay_L = detector_strain(hp, hc, RA, DEC, 0., epoch, deltaF, ifo='L1')
 
-        # Make len(htilde) = len(data) by appending zeroes
-        htildeH, dataH = make_arr_samesize(htildeH, data)
-        htildeL, dataL = make_arr_samesize(htildeL, data)
-        
-        # Adjust Fourier spectra for time-delay b/w H1 & L1:
-        fseries = np.linspace(0, fmax, int(fmax/deltaF)+1)
-        htildeH = np.exp(1j*np.pi*2*fseries*timedelay_H)
-        htildeL = np.exp(1j*np.pi*2*fseries*timedelay_L)
-        ##-- Likelihood --###
-        
-        dh_H = deltaF*4*data.conjugate()*htildeH / PSD
-        hh_H = deltaF*4.*np.sum( htildeH.conjugate()*htildeH/PSD ).real
-        dd_H = deltaF*4.*np.sum( dataH.conjugate()*dataH/PSD ).real
-        
-        dh_L = deltaF*4*data.conjugate()*htildeL / PSD
-        hh_L = deltaF*4.*np.sum( htildeL.conjugate()*htildeL/PSD ).real
-        dd_L = deltaF*4.*np.sum( dataL.conjugate()*dataL/PSD ).real
-        
-        scores_H = len(dataH)*( -0.5* ( -2*np.fft.irfft(dh_H)) )
-        scores_L = len(dataL)*( -0.5* ( -2*np.fft.irfft(dh_L)) )
-        
-        # log(Likelihood):
-        logL = logsumexp(scores_H + scores_L).real - 0.5*(hh_H + hh_L + dd_H + dd_L) + np.log(2./(2.*fmax)) 
-        # -0.5 * ( 4*deltaF*np.vdot(data - htilde, (data - htilde)/PSD) - 4*deltaF*np.vdot(data, data/PSD) ).real
-        return logL
-    
-    else:
-        print('logL params out of range')
-        return -np.inf
-
-def run_sampler(data, PSD, fmin, fmax, deltaF, ntemps, ndim, nsteps, nwalkers, job, ecc=True):
+def run_sampler(dataH1, dataL1, PSD, fmin, fmax, deltaF, ntemps, ndim, nsteps, nwalkers, job, ecc=True):
     '''
     Setting parameters: 
     '''
@@ -270,7 +181,7 @@ def run_sampler(data, PSD, fmin, fmax, deltaF, ntemps, ndim, nsteps, nwalkers, j
     
     ## Setting up the sampler:
     betas = np.logspace(0, -ntemps, ntemps, base=10)
-    sampler = PTSampler(ntemps, nwalkers, ndim, logL, logPrior, loglargs=[data, PSD, fmin, fmax, deltaF], threads=16, a=10., betas=betas)
+    sampler = PTSampler(ntemps, nwalkers, ndim, logL, logPrior, loglargs=[dataH1, dataL1, PSD, fmin, fmax, deltaF], threads=16, a=10., betas=betas)
 
     ## Running the sampler:
     print 'sampling underway...'

@@ -15,11 +15,11 @@ job = parser.parse_args()
 
 ## Setting up sampling parameters:
 ntemps = 8
-nwalkers = 50
+nwalkers = 200
 ndim = 7
-nsteps = 2000
+nsteps = 1000
 
-## Waveform parameters:
+## Frequency parameters:
 fmax = 512.
 fmin = 20.
 Fs = 2*fmax
@@ -27,10 +27,13 @@ deltaF = 1./8.
 
 ## Load in data from file:
 data_file = np.load('Injection_'+str(job.filename)+'/injectionFFT_'+str(job.filename)+'.npy')
-data = data_file[:,1]
-data = data[:int(fmax/deltaF)+1]
+dataH1 = data_file[:,1]
+dataH1 = dataH1[:int(fmax/deltaF)+1]
+dataL1 = data_file[:,2]
+dataL1 = dataL1[:int(fmax/deltaF)+1]
 freq = data_file[:,0].real[:int(fmax/deltaF)+1]
 
+# Interpolating PSD:
 PSD_file = np.loadtxt("../MonashGWTools/NoiseCurves/aLIGO_ZERO_DET_high_P_psd.txt")
 PSD = PSD_file[:,1][:int(fmax/deltaF)+1]
 PSD_interp_func = interp1d(PSD_file[:,0], PSD_file[:,1], bounds_error=False, fill_value=np.inf)
@@ -40,36 +43,26 @@ PSD = PSD_interp_func(freq)
 ## Running sampler + get log evidence & log Bayes factor:
 t1 = time.time()
 
-#sampler_e, pos, lnprob, rstate = gwi.run_sampler(data, PSD, fmin, fmax, deltaF, ntemps, ndim, nsteps, nwalkers, ecc=True)
-lnZe_pt, dlnZe_pt = gwi.run_sampler(data, PSD, fmin, fmax, deltaF, ntemps, ndim, nsteps, nwalkers, job, ecc=True)
-print 'finished sampling with e > 0'
+lnZe_pt, dlnZe_pt = gwi.run_sampler(dataH1, dataL1, PSD, fmin, fmax, deltaF, ntemps, ndim, nsteps, nwalkers, job, ecc=True)
+print("finished sampling with e > 0")
 t2 = time.time()
-print 'time taken = ',t2 - t1
+print("time taken = ",t2 - t1)
 
-#sampler_0, pos, lnprob, rstate = gwi.run_sampler(data, PSD, fmin, fmax, deltaF, ntemps, ndim, nsteps, nwalkers, ecc=False)
-lnZ0_pt, dlnZ0_pt = gwi.run_sampler(data, PSD, fmin, fmax, deltaF, ntemps, ndim, nsteps, nwalkers, job, ecc=False)
-print 'finished sampling with e = 0'
+lnZ0_pt, dlnZ0_pt = gwi.run_sampler(dataH1, dataL1, PSD, fmin, fmax, deltaF, ntemps, ndim, nsteps, nwalkers, job, ecc=False)
+print("finished sampling with e = 0")
 t3=time.time()
-print 'time taken = ',t3 - t2
+print("time taken = ",t3 - t2)
     
-#lnZe_pt, dlnZe_pt = gwi.get_Evidence(sampler_e, pos, lnprob, rstate)
-print "lnZe_pt = {} +/- {}".format(lnZe_pt, dlnZe_pt)
-#lnZ0_pt, dlnZ0_pt = gwi.get_Evidence(sampler_0, pos, lnprob, rstate)
-print "lnZ0_pt = {} +/- {}".format(lnZ0_pt, dlnZ0_pt)
+print("lnZe_pt = {} +/- {}".format(lnZe_pt, dlnZe_pt))
+print("lnZ0_pt = {} +/- {}".format(lnZ0_pt, dlnZ0_pt))
 
 lnBF = lnZe_pt - lnZ0_pt
 BF = np.exp(lnBF)
 test = (np.exp(lnZe_pt))/(np.exp(lnZ0_pt))
 
-print "lnBF = {} ".format(lnBF)
-print "BF = {} ".format(BF)
-print ""
-print'test = ',test
+print("lnBF = {} ".format(lnBF))
+print("BF = {} ".format(BF))
 
 np.savetxt('samples/BayesFactor/logEvidence_and_logBF_'+str(job.filename)+'.txt',np.c_[lnZe_pt, dlnZe_pt, lnZ0_pt, dlnZ0_pt, BF])
 
-## make corner plots:
-#print "making corner plots..."
-#gwi.make_triangles(sampler_e, job, ndim)
-
-print "finished job "+str(job.filename)+"!"
+print("finished job "+str(job.filename)+"!")
