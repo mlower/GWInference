@@ -1,6 +1,8 @@
 ![GWinference](GWinference_logo.png)
 ------
 
+#### NOTE: this repository is not being developed. Please use the [`Bilby`](https://git.ligo.org/lscsoft/bilby) package to satisfy all your Bayesian inference/GW-parameter estimation needs.
+
 Welcome to the GWInference online backup. GWInference is a lightweight, yet powerful, pure python gravitational-wave parameter estimation code based around the `emcee` python package created by [Foreman-Mackey, et al. (2013)](https://arxiv.org/pdf/1202.3665.pdf).
 
 ### Useful Information
